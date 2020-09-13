@@ -1,7 +1,7 @@
 import java.net.URI
 
 plugins {
-    java
+    id("profiler.java-library")
     groovy
     application
     `maven-publish`
@@ -19,10 +19,11 @@ repositories {
     }
 }
 
+val gradleRuntime by configurations.creating
 val profilerPlugins by configurations.creating
 
 dependencies {
-    implementation("org.gradle:gradle-tooling-api:5.2.1")
+    implementation(versions.toolingApi)
     implementation("com.google.code.findbugs:annotations:3.0.1")
     implementation("com.google.guava:guava:27.1-android") {
         because("Gradle uses the android variant as well and we are running the same code there.")
@@ -38,13 +39,13 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.6") {
         because("To write JSON output")
     }
+    implementation(project(":client-protocol"))
 
-    profilerPlugins(project(":chrome-trace")) {
-        isTransitive = false
-    }
-    profilerPlugins(project(":build-operations")) {
-        isTransitive = false
-    }
+    gradleRuntime(gradleApi())
+    gradleRuntime(versions.toolingApi)
+    profilerPlugins(project(":chrome-trace"))
+    profilerPlugins(project(":build-operations"))
+    profilerPlugins(project(":studio-agent"))
 
     runtimeOnly("org.slf4j:slf4j-simple:1.7.10")
     testImplementation("org.codehaus.groovy:groovy:2.4.7")
@@ -89,7 +90,7 @@ application.mainClassName = "org.gradle.profiler.Main"
 
 tasks.processResources {
     into("META-INF/jars") {
-        from(profilerPlugins) {
+        from(profilerPlugins.minus(gradleRuntime)) {
             // Removing the version from the JARs here, since they are referenced by name in production code.
             rename("""(.*)-\d\.\d.*\.jar""", "${'$'}1.jar")
         }
