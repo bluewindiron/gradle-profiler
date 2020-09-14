@@ -73,7 +73,7 @@ public class CommandExec {
     }
 
     private RunHandle start(ProcessBuilder processBuilder) {
-        OutputStream outputStream = Logging.detailed();
+        OutputStream outputStream = System.out;
         return start(processBuilder, outputStream, null, null);
     }
 
