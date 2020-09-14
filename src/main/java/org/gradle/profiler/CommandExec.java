@@ -34,6 +34,11 @@ public class CommandExec {
         run(processBuilder);
     }
 
+    public RunHandle start(List<String> commandLine) {
+        ProcessBuilder processBuilder = new ProcessBuilder(commandLine);
+        return start(processBuilder);
+    }
+
     public String runAndCollectOutput(List<String> commandLine) {
         return runAndCollectOutput(commandLine.toArray(new String[commandLine.size()]));
     }
@@ -41,7 +46,7 @@ public class CommandExec {
     public String runAndCollectOutput(String... commandLine) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            run(new ProcessBuilder(commandLine), outputStream, null, null).waitForSuccess();
+            start(new ProcessBuilder(commandLine), outputStream, null, null).waitForSuccess();
         } catch (RuntimeException e) {
             System.out.print(new String(outputStream.toByteArray()));
             throw e;
@@ -60,15 +65,19 @@ public class CommandExec {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        run(new ProcessBuilder(commandLine), new BufferedOutputStream(outputStream), Logging.detailed(), null).waitForSuccess();
+        start(new ProcessBuilder(commandLine), new BufferedOutputStream(outputStream), Logging.detailed(), null).waitForSuccess();
     }
 
     public void run(ProcessBuilder processBuilder) {
-        OutputStream outputStream = Logging.detailed();
-        run(processBuilder, outputStream, null, null).waitForSuccess();
+        start(processBuilder).waitForSuccess();
     }
 
-    protected RunHandle run(ProcessBuilder processBuilder, OutputStream outputStream, @Nullable OutputStream errorStream, @Nullable InputStream inputStream) {
+    private RunHandle start(ProcessBuilder processBuilder) {
+        OutputStream outputStream = Logging.detailed();
+        return start(processBuilder, outputStream, null, null);
+    }
+
+    private RunHandle start(ProcessBuilder processBuilder, OutputStream outputStream, @Nullable OutputStream errorStream, @Nullable InputStream inputStream) {
         if (directory != null) {
             processBuilder.directory(directory);
         }
