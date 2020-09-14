@@ -43,6 +43,7 @@ class ScenarioLoaderTest extends Specification {
             .setTargets([])
             .setSysProperties([:])
             .setGradleUserHome(gradleUserHomeDir)
+            .setStudioInstallDir(tmpDir.newFolder())
             .setWarmupCount(warmups)
             .setIterations(iterations)
             .setMeasureConfigTime(false)
